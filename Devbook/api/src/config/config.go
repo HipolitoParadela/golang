@@ -15,6 +15,9 @@ var (
 
 	// Puerto de la API
 	Puerto = 0
+
+	// Secret Key para jwt
+	SecretKey []byte
 )
 
 // CARGAR va a inicializar las varibales de ambiente
@@ -30,8 +33,10 @@ func Cargar() {
 		Puerto = 9000
 	}
 
-	StringConeccionDB = fmt.Sprintf("%s:$s/%s?charset=utf8&parseTime=True&loc=Local",
+	StringConeccionDB = fmt.Sprintf("%s:%s@/%s?charset=utf8&parseTime=True&loc=Local",
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASS"),
 		os.Getenv("DB_NAME"))
+
+	SecretKey = []byte(os.Getenv("SECRET_KEY"))
 }
