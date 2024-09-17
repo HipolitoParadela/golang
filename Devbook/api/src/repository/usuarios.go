@@ -153,3 +153,137 @@ func (repository Usuarios) BuscarPorEmail(email string) (model.Usuario, error) {
 
 	return usuario, nil
 }
+
+// SEGUIR UN USUARIO
+func (repository Usuarios) SeguirUsuario(usuarioID, seguidorID uint64) error {
+	statement, erro := repository.db.Prepare(
+		"insert ignore into seguidores ( usuario_id, seguidor_id) values (?, ?)",
+	)
+	if erro != nil {
+		return erro
+	}
+	defer statement.Close()
+
+	if _, erro = statement.Exec(usuarioID, seguidorID); erro != nil {
+		return erro
+	}
+
+	return nil
+}
+
+// DEJAR DE SEGUIR UN USUARIO
+func (repository Usuarios) ParaDeSeguirUsuario(usuarioID, seguidorID uint64) error {
+	statement, erro := repository.db.Prepare(
+		"delete from seguidores where usuario_id = ? and seguidor_id = ?)",
+	)
+	if erro != nil {
+		return erro
+	}
+	defer statement.Close()
+
+	if _, erro = statement.Exec(usuarioID, seguidorID); erro != nil {
+		return erro
+	}
+
+	return nil
+}
+
+// Buscar seguidores
+func (repository Usuarios) BuscarSeguidores(usuarioID uint64) ([]model.Usuario, error) {
+	resultQuery, erro := repository.db.Query(`
+		select u.id, u.nome, u.email, u.created_at
+		from usuarios u
+		inner join seguidores s on.id = s.seguidor_id 
+		where s. usuario_id = ?
+	`, usuarioID)
+	if erro != nil {
+		return nil, erro
+	}
+	defer resultQuery.Close()
+
+	var usuarios []model.Usuario
+	for resultQuery.Next() {
+		var usuario model.Usuario
+
+		if erro = resultQuery.Scan(
+			&usuario.ID,
+			&usuario.Nome,
+			&usuario.Nick,
+			&usuario.Email,
+			&usuario.Created_at,
+		); erro != nil {
+			return nil, erro
+		}
+
+		usuarios = append(usuarios, usuario)
+	}
+
+	return usuarios, nil
+}
+
+// Buscar usuarios seguidos
+func (repository Usuarios) BuscarSeguidos(usuarioID uint64) ([]model.Usuario, error) {
+	resultQuery, erro := repository.db.Query(`
+		select u.id, u.nome, u.email, u.created_at
+		from usuarios u
+		inner join seguidores s on.id = s.seguidor_id 
+		where s. seguidor_id = ?
+	`, usuarioID)
+	if erro != nil {
+		return nil, erro
+	}
+	defer resultQuery.Close()
+
+	var usuarios []model.Usuario
+	for resultQuery.Next() {
+		var usuario model.Usuario
+
+		if erro = resultQuery.Scan(
+			&usuario.ID,
+			&usuario.Nome,
+			&usuario.Nick,
+			&usuario.Email,
+			&usuario.Created_at,
+		); erro != nil {
+			return nil, erro
+		}
+
+		usuarios = append(usuarios, usuario)
+	}
+
+	return usuarios, nil
+}
+
+// Busca la pass de un usuario por su id
+func (repository Usuarios) BuscarPassActual(usuarioID uint64) (string, error) {
+	resultQuery, erro := repository.db.Query(`select pass from usuarios where id = ?`, usuarioID)
+	if erro != nil {
+		return "", erro
+	}
+	defer resultQuery.Close()
+
+	var usuario model.Usuario
+
+	if resultQuery.Next() {
+		if erro = resultQuery.Scan(&usuario.Pass); erro != nil {
+			return "", erro
+		}
+	}
+
+	return usuario.Pass, nil
+}
+
+// Actualizar la contraseña de un usuario
+func (repository Usuarios) ActualizarPass(usuarioID uint64, pass string) error {
+	statement, erro := repository.db.Prepare(`update usuarios set pass = ? where id = ?`)
+	if erro != nil {
+		return erro
+	}
+	defer statement.Close()
+
+	if _, erro = statement.Exec(pass, usuarioID); erro != nil {
+		return erro
+	}
+
+	return nil
+}
