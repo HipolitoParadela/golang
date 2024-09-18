@@ -2,8 +2,9 @@ CREATE DATABASE IF NOT  EXIST devbook;
 
 USE devbook;
 
-DROP TABLE IF EXIST usuarios;
+DROP TABLE IF EXIST publicaciones;
 DROP TABLE IF EXIST seguidores;
+DROP TABLE IF EXIST usuarios;
 
 CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -21,4 +22,14 @@ CREATE TABLE seguidores (
     FOREIGN KEY (seguidor_id) REFERENCES usuarios(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (usuario_id, seguidor_id)
+) ENGINE=InnoDB;
+
+CREATE TABLE publicaciones (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(50) NOT NULL,
+    contenido VARCHAR(300) NOT NULL,
+    autor_id INT NOT NULL,
+    FOREIGN KEY (autor_id) REFERENCES usuarios(id) ON DELETE CASCADE, 
+    curtidas INT default 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
