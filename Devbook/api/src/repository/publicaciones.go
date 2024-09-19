@@ -204,7 +204,11 @@ func (repository Publicaciones) CurtirPublicacion(publicacionID uint64) error {
 // DEJAR DE SEGUIR UN USUARIO
 func (repository Publicaciones) DescurtirPublicacion(publicacionID uint64) error {
 	statement, erro := repository.db.Prepare(
-		"update publicaciones set curtidas = curtidas - 1 where id = ?",
+		`update publicaciones set curtidas = 
+		CASE 
+			WHEN curtidas > 0 THEN curtidas - 1 
+			ELSE 0 END
+		where id = ?`,
 	)
 	if erro != nil {
 		return erro
